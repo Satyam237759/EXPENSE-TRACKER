@@ -1,0 +1,6 @@
+{
+  "name": "Expense Tracker",
+  "description": "A modern, responsive personal finance and expense tracking dashboard powered by SQLite with dynamic calculations, category analytics, and transaction management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

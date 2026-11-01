@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}User Profile — SmartSpend{% endblock %}
+{% block page_title %}Profile & Account Settings{% endblock %}
+
+{% block content %}
+<div class="profile-container max-w-3xl">
+    <div class="card p-6">
+        <div class="flex items-center gap-4 pb-5 border-b border-subtle">
+            <div class="avatar-lg">
+                {{ user.name[:1] }}
+            </div>
+            <div>
+                <h2 class="text-xl font-bold">{{ user.name }}</h2>
+                <p class="text-sm text-muted">{{ user.email }}</p>
+                <span class="badge badge-success mt-1">Verified SmartSpend Member</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('profile_page') }}" class="mt-6 space-y-4">
+            <h3 class="text-base font-bold mb-3">Personal Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="profName">Full Name</label>
+                    <input type="text" id="profName" name="name" class="form-control" value="{{ user.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="profEmail">Email Address</label>
+                    <input type="email" id="profEmail" name="email" class="form-control" value="{{ user.email }}" required>
+                </div>
+            </div>
+
+            <div class="border-t border-subtle pt-5 mt-5">
+                <h3 class="text-base font-bold mb-1">Security & Password</h3>
+                <p class="text-xs text-muted mb-3">Leave blank if you do not wish to update your password.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="profCurrentPwd">Current Password</label>
+                        <input type="password" id="profCurrentPwd" name="current_password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="profNewPwd">New Password</label>
+                        <input type="password" id="profNewPwd" name="new_password" minlength="6" class="form-control" placeholder="••••••••">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Profile Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- System & Database Architecture Info -->
+    <div class="card p-6 mt-4">
+        <h3 class="text-base font-bold mb-2">Database & Security Specifications</h3>
+        <ul class="text-xs text-muted space-y-2">
+            <li><i class="fa-solid fa-check text-success"></i> <strong>SQLite Persistence:</strong> Data is saved permanently in <code>smartspend.db</code>.</li>
+            <li><i class="fa-solid fa-check text-success"></i> <strong>User Isolation:</strong> Strict multi-tenant user_id checks prevent cross-account access.</li>
+            <li><i class="fa-solid fa-check text-success"></i> <strong>Cryptographic Security:</strong> Passwords hashed with PBKDF2-HMAC-SHA256 (100,000 rounds) + unique salt.</li>
+            <li><i class="fa-solid fa-check text-success"></i> <strong>SQL Injection Immunity:</strong> All queries use parameterized <code>?</code> placeholders.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

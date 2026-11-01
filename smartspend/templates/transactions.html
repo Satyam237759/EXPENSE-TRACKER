@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}{% if default_type == 'income' %}Income Hub{% else %}Transactions{% endif %} — SmartSpend{% endblock %}
+{% block page_title %}{% if default_type == 'income' %}Income Management{% else %}Transaction History{% endif %}{% endblock %}
+
+{% block content %}
+<div class="transactions-container">
+    <div class="card">
+        <!-- Header & Action Row -->
+        <div class="card-header flex-between flex-wrap gap-3">
+            <div>
+                <h3 class="card-title">{% if default_type == 'income' %}Income Sources & Deposits{% else %}All Financial Transactions{% endif %}</h3>
+                <p class="card-subtitle">Manage, filter, search, and audit your records</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="btn btn-outline btn-sm" onclick="exportFilteredCSV()">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openTransactionModal('{{ default_type or 'expense' }}')">
+                    <i class="fa-solid fa-plus"></i> {% if default_type == 'income' %}Record Income{% else %}New Transaction{% endif %}
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="filter-bar">
+            <!-- Search -->
+            <div class="filter-item filter-search">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="filterSearch" class="form-control" placeholder="Search title or notes...">
+            </div>
+
+            <!-- Type -->
+            <div class="filter-item">
+                <select id="filterType" class="form-control">
+                    <option value="" {% if not default_type %}selected{% endif %}>All Types</option>
+                    <option value="expense" {% if default_type == 'expense' %}selected{% endif %}>Expenses Only</option>
+                    <option value="income" {% if default_type == 'income' %}selected{% endif %}>Income Only</option>
+                </select>
+            </div>
+
+            <!-- Category -->
+            <div class="filter-item">
+                <select id="filterCategory" class="form-control">
+                    <option value="">All Categories</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="filter-item">
+                <select id="filterPayment" class="form-control">
+                    <option value="">All Payment Methods</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Net Banking">Net Banking</option>
+                    <option value="Cash">Cash</option>
+                </select>
+            </div>
+
+            <!-- Dates -->
+            <div class="filter-item filter-dates">
+                <input type="date" id="filterStartDate" class="form-control" title="Start date">
+                <span class="to-text">to</span>
+                <input type="date" id="filterEndDate" class="form-control" title="End date">
+            </div>
+
+            <div class="filter-item">
+                <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Transactions Table View -->
+        <div class="table-responsive">
+            <table class="data-table" id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th onclick="changeSort('date')" class="sortable">Date <i class="fa-solid fa-sort"></i></th>
+                        <th onclick="changeSort('title')" class="sortable">Title & Description <i class="fa-solid fa-sort"></i></th>
+                        <th onclick="changeSort('category')" class="sortable">Category <i class="fa-solid fa-sort"></i></th>
+                        <th>Payment Method</th>
+                        <th>Type</th>
+                        <th onclick="changeSort('amount')" class="sortable text-right">Amount (₹) <i class="fa-solid fa-sort"></i></th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Loading transactions from SQLite...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-bar flex-between flex-wrap gap-2">
+            <div class="pagination-info" id="paginationInfo">
+                Showing 0 to 0 of 0 records
+            </div>
+            <div class="pagination-controls flex items-center gap-2">
+                <button class="btn btn-outline btn-xs" id="btnPrevPage" onclick="prevPage()" disabled>Previous</button>
+                <span class="page-indicator" id="pageIndicator">Page 1</span>
+                <button class="btn btn-outline btn-xs" id="btnNextPage" onclick="nextPage()" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteConfirmModal">
+    <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+    <div class="modal-card modal-sm">
+        <div class="modal-header">
+            <h3>Delete Transaction</h3>
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body p-4">
+            <p>Are you sure you want to permanently delete this transaction? This action will remove the record from your SQLite database.</p>
+            <div class="delete-preview-box mt-3" id="deletePreviewBox"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDelete()">
+                <i class="fa-solid fa-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/transactions.js') }}"></script>
+{% endblock %}

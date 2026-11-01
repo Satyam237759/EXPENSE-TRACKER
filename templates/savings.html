@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Savings Goals — SmartSpend{% endblock %}
+{% block page_title %}Savings Goals & Wealth Target{% endblock %}
+
+{% block content %}
+<div class="savings-container">
+    <div class="card p-4 flex-between flex-wrap gap-3">
+        <div>
+            <h3 class="card-title">Dedicated Savings Goals</h3>
+            <p class="card-subtitle">Track targets with actual deposited contributions (separate from theoretical savings)</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openNewGoalModal()">
+            <i class="fa-solid fa-plus"></i> New Savings Goal
+        </button>
+    </div>
+
+    <!-- Savings Goals Grid -->
+    <div class="goals-grid mt-4" id="savingsGoalsGrid">
+        <div class="loading-spinner">Loading savings goals...</div>
+    </div>
+</div>
+
+<!-- New Goal Modal -->
+<div class="modal" id="newGoalModal">
+    <div class="modal-overlay" onclick="closeNewGoalModal()"></div>
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Create New Savings Goal</h3>
+            <button class="modal-close" onclick="closeNewGoalModal()">&times;</button>
+        </div>
+        <form id="newGoalForm" onsubmit="handleNewGoalSubmit(event)">
+            <div class="form-group">
+                <label class="form-label" for="goalTitle">Goal Title *</label>
+                <input type="text" id="goalTitle" class="form-control" required placeholder="e.g. MacBook Pro M3, Emergency Fund, Goa Trip">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="goalTargetAmount">Target Amount (₹) *</label>
+                    <div class="input-icon-wrapper">
+                        <span class="input-icon">₹</span>
+                        <input type="number" step="100" min="1" id="goalTargetAmount" class="form-control pl-icon" required placeholder="100000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="goalTargetDate">Target Completion Date *</label>
+                    <input type="date" id="goalTargetDate" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="goalCategory">Category</label>
+                    <input type="text" id="goalCategory" class="form-control" placeholder="e.g. Electronics, Travel, Security" value="General">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="goalInitialAmount">Initial Deposit (₹)</label>
+                    <div class="input-icon-wrapper">
+                        <span class="input-icon">₹</span>
+                        <input type="number" step="10" min="0" id="goalInitialAmount" class="form-control pl-icon" placeholder="0.00" value="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="goalNotes">Notes</label>
+                <textarea id="goalNotes" class="form-control" rows="2" placeholder="Describe the purpose or milestone strategy..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeNewGoalModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Goal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Contribution Modal -->
+<div class="modal" id="contributionModal">
+    <div class="modal-overlay" onclick="closeContributionModal()"></div>
+    <div class="modal-card modal-sm">
+        <div class="modal-header">
+            <h3>Add Contribution</h3>
+            <button class="modal-close" onclick="closeContributionModal()">&times;</button>
+        </div>
+        <form id="contributionForm" onsubmit="handleContributionSubmit(event)">
+            <input type="hidden" id="contribGoalId">
+            <p class="text-xs text-muted mb-3" id="contribGoalHeading">Recording deposit towards goal</p>
+
+            <div class="form-group">
+                <label class="form-label" for="contribAmount">Deposit Amount (₹) *</label>
+                <div class="input-icon-wrapper">
+                    <span class="input-icon">₹</span>
+                    <input type="number" step="10" min="1" id="contribAmount" class="form-control pl-icon" required placeholder="5000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="contribDate">Deposit Date *</label>
+                <input type="date" id="contribDate" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="contribNotes">Notes</label>
+                <input type="text" id="contribNotes" class="form-control" placeholder="e.g. Monthly salary transfer, Bonus savings">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeContributionModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Deposit</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/savings.js') }}"></script>
+{% endblock %}

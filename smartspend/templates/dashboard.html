@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SmartSpend{% endblock %}
+{% block page_title %}Financial Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Top KPI Summary Cards -->
+    <div class="stats-grid">
+        <!-- 1. Total Balance Card -->
+        <div class="stat-card stat-card-balance">
+            <div class="stat-card-header">
+                <span class="stat-label">Total Balance</span>
+                <div class="stat-icon-box bg-balance">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+            </div>
+            <div class="stat-value font-mono tabular-nums" id="statBalance">₹0.00</div>
+            <div class="stat-footer text-emerald-300">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span id="statSavingsRate">0.0%</span> savings rate
+            </div>
+        </div>
+
+        <!-- 2. Total Income -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Total Income</span>
+                <div class="stat-icon-box bg-income">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+            </div>
+            <div class="stat-value text-success font-mono tabular-nums" id="statIncome">₹0.00</div>
+            <div class="stat-footer text-muted">
+                <span id="statMonthIncome">₹0.00</span> this month
+            </div>
+        </div>
+
+        <!-- 3. Total Expenses -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Total Expenses</span>
+                <div class="stat-icon-box bg-expense">
+                    <i class="fa-solid fa-arrow-trend-down"></i>
+                </div>
+            </div>
+            <div class="stat-value text-danger font-mono tabular-nums" id="statExpense">₹0.00</div>
+            <div class="stat-footer text-muted">
+                <span id="statMonthExpense">₹0.00</span> this month
+            </div>
+        </div>
+
+        <!-- 4. Monthly Budget Usage -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Monthly Budget</span>
+                <div class="stat-icon-box bg-budget">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+            </div>
+            <div class="stat-value font-mono tabular-nums" id="statBudgetUsed">0.0%</div>
+            <!-- Progress Bar -->
+            <div class="progress-bar-wrapper mt-2">
+                <div class="progress-bar" id="budgetProgressBar" style="width: 0%;"></div>
+            </div>
+            <div class="stat-footer text-muted mt-2">
+                Remaining: <span class="font-mono" id="statBudgetRemaining">₹0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Insights Row -->
+    <div class="insights-bar">
+        <div class="insight-pill">
+            <i class="fa-solid fa-fire text-danger"></i>
+            <span>Top Expense Category: <strong id="statTopCategory">Rent</strong></span>
+        </div>
+        <div class="insight-pill">
+            <i class="fa-solid fa-piggy-bank text-success"></i>
+            <span>Monthly Net Savings: <strong class="font-mono" id="statMonthlySavings">₹0.00</strong></span>
+        </div>
+        <div class="insight-actions ml-auto">
+            <button class="btn btn-outline btn-xs" onclick="openTransactionModal('expense')">
+                <i class="fa-solid fa-plus"></i> Quick Expense
+            </button>
+            <button class="btn btn-outline btn-xs" onclick="openTransactionModal('income')">
+                <i class="fa-solid fa-plus"></i> Quick Income
+            </button>
+        </div>
+    </div>
+
+    <!-- Interactive Charts Grid -->
+    <div class="charts-grid mt-4">
+        <!-- Monthly Income vs Expense Chart -->
+        <div class="card chart-card lg-col-8">
+            <div class="card-header flex-between">
+                <div>
+                    <h3 class="card-title">Income vs. Expense Trend</h3>
+                    <p class="card-subtitle">Monthly cash flow history</p>
+                </div>
+                <div class="chart-badge">
+                    <span class="dot-income"></span> Income
+                    <span class="dot-expense ml-2"></span> Expense
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="monthlyTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Category Breakdown Doughnut Chart -->
+        <div class="card chart-card lg-col-4">
+            <div class="card-header flex-between">
+                <div>
+                    <h3 class="card-title">Spending by Category</h3>
+                    <p class="card-subtitle">Expense distribution percentage</p>
+                </div>
+            </div>
+            <div class="chart-wrapper donut-wrapper">
+                <canvas id="categoryDonutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Spending & Recent Transactions Grid -->
+    <div class="charts-grid mt-4">
+        <!-- Weekly Spending Trend -->
+        <div class="card lg-col-6">
+            <div class="card-header">
+                <h3 class="card-title">Weekly Spending Trend</h3>
+                <p class="card-subtitle">Daily expenditure across the last 7 days</p>
+            </div>
+            <div class="chart-wrapper" style="height: 250px;">
+                <canvas id="weeklySpendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card lg-col-6">
+            <div class="card-header flex-between">
+                <div>
+                    <h3 class="card-title">Recent Transactions</h3>
+                    <p class="card-subtitle">Latest recorded activity</p>
+                </div>
+                <a href="{{ url_for('transactions_page') }}" class="btn-link">View All &rarr;</a>
+            </div>
+            <div class="recent-tx-list" id="recentTxList">
+                <div class="loading-spinner">Loading recent activity...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartSpend — Professional Expense Tracker{% endblock %}</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="theme-dark">
+    {% if current_user %}
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-logo">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h2>SmartSpend</h2>
+                        <span>Personal Finance</span>
+                    </div>
+                </div>
+                <button class="mobile-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="sidebar-actions">
+                <button class="btn btn-primary btn-block" onclick="openTransactionModal('expense')">
+                    <i class="fa-solid fa-minus"></i> Add Expense
+                </button>
+                <button class="btn btn-success btn-block" onclick="openTransactionModal('income')">
+                    <i class="fa-solid fa-plus"></i> Add Income
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <span class="nav-section-label">MENU</span>
+                <a href="{{ url_for('dashboard_page') }}" class="nav-item {% if request.endpoint == 'dashboard_page' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('transactions_page') }}" class="nav-item {% if request.endpoint == 'transactions_page' %}active{% endif %}">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="{{ url_for('income_page') }}" class="nav-item {% if request.endpoint == 'income_page' %}active{% endif %}">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <span>Income Hub</span>
+                </a>
+                <a href="{{ url_for('budgets_page') }}" class="nav-item {% if request.endpoint == 'budgets_page' %}active{% endif %}">
+                    <i class="fa-solid fa-piggy-bank"></i>
+                    <span>Budgets</span>
+                </a>
+                <a href="{{ url_for('savings_page') }}" class="nav-item {% if request.endpoint == 'savings_page' %}active{% endif %}">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Savings Goals</span>
+                </a>
+                <a href="{{ url_for('recurring_page') }}" class="nav-item {% if request.endpoint == 'recurring_page' %}active{% endif %}">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Recurring Rules</span>
+                </a>
+                <a href="{{ url_for('analytics_page') }}" class="nav-item {% if request.endpoint == 'analytics_page' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Analytics & Reports</span>
+                </a>
+
+                <span class="nav-section-label">ACCOUNT</span>
+                <a href="{{ url_for('profile_page') }}" class="nav-item {% if request.endpoint == 'profile_page' %}active{% endif %}">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Profile Settings</span>
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-item nav-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Sign Out</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-badge">
+                    <div class="avatar">{{ current_user.name[:1] }}</div>
+                    <div class="user-info">
+                        <strong>{{ current_user.name }}</strong>
+                        <small>{{ current_user.email }}</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="main-content">
+            <!-- Top Header Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="hamburger-btn" id="sidebarOpenBtn" aria-label="Open sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="page-title-crumb">
+                        <span class="app-crumb">SmartSpend</span>
+                        <span class="crumb-separator">/</span>
+                        <span class="current-crumb">{% block page_title %}Dashboard{% endblock %}</span>
+                    </div>
+                </div>
+
+                <div class="top-bar-right">
+                    <div class="currency-tag">
+                        <i class="fa-solid fa-indian-rupee-sign"></i> INR (₹)
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="exportCSV()">
+                        <i class="fa-solid fa-download"></i> Export CSV
+                    </button>
+                    <a href="{{ url_for('profile_page') }}" class="user-profile-btn" title="Account Profile">
+                        <i class="fa-regular fa-circle-user"></i>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Flash Alert Container -->
+            <div class="flash-messages-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <span>{{ message }}</span>
+                                <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Page Body -->
+            <main class="page-body">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% else %}
+        <!-- Unauthenticated Flow (Login / Register) -->
+        <main class="auth-wrapper">
+            {% block auth_content %}{% endblock %}
+        </main>
+    {% endif %}
+
+    <!-- Global Transaction Modal -->
+    <div class="modal" id="globalTransactionModal">
+        <div class="modal-overlay" onclick="closeTransactionModal()"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalTxHeading">Record Transaction</h3>
+                <button class="modal-close" onclick="closeTransactionModal()">&times;</button>
+            </div>
+            <form id="globalTransactionForm" onsubmit="handleGlobalTxSubmit(event)">
+                <input type="hidden" id="txId" value="">
+                
+                <div class="form-group">
+                    <label class="form-label">Type *</label>
+                    <div class="type-toggle-group">
+                        <button type="button" class="type-btn active" id="btnTypeExpense" onclick="setTxModalType('expense')">
+                            <i class="fa-solid fa-arrow-down"></i> Expense
+                        </button>
+                        <button type="button" class="type-btn" id="btnTypeIncome" onclick="setTxModalType('income')">
+                            <i class="fa-solid fa-arrow-up"></i> Income
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="txTitle">Title / Description *</label>
+                    <input type="text" id="txTitle" class="form-control" required placeholder="e.g. Grocery Supermarket, Freelance project">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="txAmount">Amount (₹) *</label>
+                        <div class="input-icon-wrapper">
+                            <span class="input-icon">₹</span>
+                            <input type="number" step="0.01" min="0.01" id="txAmount" class="form-control pl-icon" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="txDate">Date *</label>
+                        <input type="date" id="txDate" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="txCategory">Category *</label>
+                        <select id="txCategory" class="form-control" required>
+                            <!-- Dynamically loaded -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="txPaymentMethod">Payment Method</label>
+                        <select id="txPaymentMethod" class="form-control">
+                            <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Net Banking">Net Banking</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="txNotes">Notes (Optional)</label>
+                    <textarea id="txNotes" class="form-control" rows="2" placeholder="Invoice details, merchant, or tags..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeTransactionModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="txSubmitBtn">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Core App Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Sign In — SmartSpend{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+    <div class="auth-header">
+        <div class="auth-brand">
+            <div class="brand-logo">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <h1>SmartSpend</h1>
+        </div>
+        <p class="auth-subtitle">Professional Personal Finance & Expense Tracker</p>
+    </div>
+
+    <!-- Flash message alerts -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login_page') }}" class="auth-form">
+        <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <div class="input-icon-wrapper">
+                <span class="input-icon"><i class="fa-regular fa-envelope"></i></span>
+                <input type="email" id="loginEmail" name="email" class="form-control pl-icon" value="demo@smartspend.in" required placeholder="name@domain.com">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <div class="input-icon-wrapper">
+                <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+                <input type="password" id="loginPassword" name="password" class="form-control pl-icon" value="Demo@123" required placeholder="••••••••">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg mt-3">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to SmartSpend
+        </button>
+    </form>
+
+    <div class="demo-credentials-box">
+        <div class="demo-tag"><i class="fa-solid fa-key"></i> Quick Demo Credentials:</div>
+        <div class="demo-details">
+            <code>Email: demo@smartspend.in</code>
+            <code>Password: Demo@123</code>
+        </div>
+        <button type="button" class="btn btn-outline btn-xs mt-2" onclick="document.getElementById('loginEmail').value='demo@smartspend.in'; document.getElementById('loginPassword').value='Demo@123';">
+            Fill Demo Account
+        </button>
+    </div>
+
+    <div class="auth-footer">
+        <p>Don't have an account yet? <a href="{{ url_for('register_page') }}">Create one for free</a></p>
+    </div>
+</div>
+{% endblock %}

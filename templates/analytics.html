@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Analytics & Reports — SmartSpend{% endblock %}
+{% block page_title %}Analytics & Financial Reports{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <!-- Date Range & Preset Filter Bar -->
+    <div class="card p-4 flex-between flex-wrap gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-bold uppercase text-muted">Time Period:</span>
+            <button class="btn btn-outline btn-xs" onclick="setAnalyticsPreset(30)">Last 30 Days</button>
+            <button class="btn btn-outline btn-xs active" id="btnPreset90" onclick="setAnalyticsPreset(90)">Last 90 Days</button>
+            <button class="btn btn-outline btn-xs" onclick="setAnalyticsPreset(365)">This Year</button>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+            <input type="date" id="analyticsStart" class="form-control" style="width: 150px;">
+            <span class="text-muted text-xs">to</span>
+            <input type="date" id="analyticsEnd" class="form-control" style="width: 150px;">
+            <button class="btn btn-primary btn-sm" onclick="loadAnalytics()">
+                <i class="fa-solid fa-filter"></i> Apply
+            </button>
+        </div>
+    </div>
+
+    <!-- Analytics KPI Cards -->
+    <div class="stats-grid mt-4">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Daily Avg Spending</span>
+                <div class="stat-icon-box bg-expense">
+                    <i class="fa-solid fa-calendar-day"></i>
+                </div>
+            </div>
+            <div class="stat-value font-mono tabular-nums text-danger" id="anDailyAvg">₹0.00</div>
+            <div class="stat-footer text-muted">Per day in selected period</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Net Savings</span>
+                <div class="stat-icon-box bg-balance">
+                    <i class="fa-solid fa-piggy-bank"></i>
+                </div>
+            </div>
+            <div class="stat-value font-mono tabular-nums text-success" id="anNetSavings">₹0.00</div>
+            <div class="stat-footer text-muted" id="anSavingsRate">0.0% savings rate</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Highest Spend Month</span>
+                <div class="stat-icon-box bg-budget">
+                    <i class="fa-solid fa-arrow-up-right-dots"></i>
+                </div>
+            </div>
+            <div class="stat-value font-mono tabular-nums" id="anHighMonth">₹0.00</div>
+            <div class="stat-footer text-muted" id="anHighMonthLabel">Month: N/A</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Lowest Spend Month</span>
+                <div class="stat-icon-box bg-income">
+                    <i class="fa-solid fa-arrow-down-right-dots"></i>
+                </div>
+            </div>
+            <div class="stat-value font-mono tabular-nums text-success" id="anLowMonth">₹0.00</div>
+            <div class="stat-footer text-muted" id="anLowMonthLabel">Month: N/A</div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid mt-4">
+        <!-- Income vs Expense Bar Chart -->
+        <div class="card chart-card lg-col-8">
+            <div class="card-header flex-between">
+                <div>
+                    <h3 class="card-title">Cash Flow Analytics</h3>
+                    <p class="card-subtitle">Period comparison between revenue & expenditures</p>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="analyticsBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Payment Methods Breakdown -->
+        <div class="card chart-card lg-col-4">
+            <div class="card-header">
+                <h3 class="card-title">Payment Method Share</h3>
+                <p class="card-subtitle">UPI vs Card vs Cash distribution</p>
+            </div>
+            <div class="chart-wrapper donut-wrapper">
+                <canvas id="analyticsPaymentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown Table -->
+    <div class="card mt-4">
+        <div class="card-header flex-between">
+            <div>
+                <h3 class="card-title">Category-Wise Expenditure Breakdown</h3>
+                <p class="card-subtitle">Exact volume and percentage attribution</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportFilteredCSV()">
+                <i class="fa-solid fa-download"></i> Download Report (CSV)
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Transactions Count</th>
+                        <th>Contribution %</th>
+                        <th class="text-right">Total Spent (₹)</th>
+                    </tr>
+                </thead>
+                <tbody id="anCategoryTableBody">
+                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading breakdown...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}
